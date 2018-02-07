@@ -1,33 +1,10 @@
-//very simillar to import in java
-//in js we get an object / (objects) to work with 
-
 var express = require('express')
-//var bodyParser = import body-parser
 var bodyParser = require('body-parser')
-
-
-//like new express() in JAVA
 var app = express()
 
-// parse application/json
+//body-parser (used for POST Reueqsts) parse application/json
 app.use(bodyParser.json())
 
-
-
- 
-//types in js:
- //Boolean, Number /*3*/, String, Function, Object
-//var x = function(){console.log('Hello')}//String
-//in java script functions are first class citizens
-
-// function callback(req, res){
-//     res.send("Home Page!")
-// }
-
-//localhost:3000/about
-
-
- 
 var expenses = [
     {
         title:'Burger', 
@@ -49,28 +26,65 @@ var expenses = [
     }
 ];
 
-app.get('/expenses', function(req, res){
-    res.json(expenses)
-});
-
-// add dependency: parse json from the body:
-app.post('/expenses', function(req, res){
-
-    var expense = req.body //body-parser
-
-    expenses.push(expense)
- 
-    res.send('response to POST Request...')
-});
+app.get('/expenses', (req, res)=>{
+    res.json(expenses);
+})
 
 
-//localhost:3000
-app.get('/', function(req, res){
-    res.send("Index Page")
-});
-// app.get('/', function (req, res) {
-//   res.send('Hello World')
-// })
+app.post('/expenses', (req, res)=>{
+    var expense = req.body
+    //validate before inserting to the database...
+    //TODO: validate.
+
+    //if there is an expense:
+    if(expense && expense.title && expense.category && expense.amount){
+        expenses.push(expense)
+        res.json({'success': true})
+    }else{
+        res.json({'success': false})
+    }
+})
+
+//get Expense By ID
+app.get('/expenses/:id', (req, res)=>{
+    var id = req.params.id
+    var expense = expenses[id]
+    if(expense){
+        res.json(expense)
+    }else{
+        res.json({success: 'false'})
+    }
+})
+
+//get Expense By ID
+app.delete('/expenses/:id', (req, res)=>{
+    
+        //fruits.splice(2, 1);
+        var id = req.params.id
+        var deleted = expenses.splice(id, 1)
+    
+        if(deleted.length > 0){
+            //deleted['success'] = true
+            res.json(deleted)
+        }else{
+            res.json({success: 'false'})
+        }
+    }
+)
+
+//update by id:
+app.put('/expenses/:id', (req, res)=>{
+    const id = req.params.id //index in the array
+
+    var expense = req.body //what to put instead at the index.
+    if(expenses[id]){
+     expenses[id] = expense
+    res.json(expense)
+    }else{
+        res.json({'success':false, 'message': 'No Such id'})
+    }
+})
+    
 
 //start the server on port 3000
 app.listen(3000)
